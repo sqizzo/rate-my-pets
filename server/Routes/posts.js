@@ -1,14 +1,17 @@
 const express = require("express");
 const Post = require("../models/Post");
+const User = require("../models/User");
+const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
-const postRoutes = require("../Routes/posts");
 
 // Get all posts
 // url: /posts
 router.get("/", async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 });
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate("author", "username");
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch the posts" });
@@ -18,9 +21,20 @@ router.get("/", async (req, res) => {
 // Create post
 // url: /posts
 router.post("/", async (req, res) => {
+  const { petName, category, imageUrl, author } = req.body;
+
+  if (!mongoose.isValidObjectId(author)) {
+    return res.status(400).json({ error: "Invalid author/user ID" });
+  }
+
   try {
-    const { petName, category, imageUrl } = req.body;
-    const newPost = await Post.create({ petName, category, imageUrl });
+    const userExist = await User.findById(author);
+
+    if (!userExist) {
+      return res.status(400).json({ error: "Author/user ID was not found" });
+    }
+
+    const newPost = await Post.create({ petName, category, imageUrl, author });
     res.status(201).json(newPost);
   } catch (error) {
     res.status(500).json({ error: "Failed to create post" });
@@ -40,7 +54,7 @@ router.patch("/:id/like", async (req, res) => {
     );
 
     if (!likedPost) {
-      res.status(404).json({ error: "Target post was not found" });
+      return res.status(404).json({ error: "Target post was not found" });
     }
 
     res.status(200).json(likedPost);
@@ -53,7 +67,10 @@ router.patch("/:id/like", async (req, res) => {
 // url: /posts/popular
 router.get("/popular", async (req, res) => {
   try {
-    const popularPosts = await Post.find().sort({ likes: -1 }).limit(7);
+    const popularPosts = await Post.find({ likes: { $gt: 0 } })
+      .sort({ likes: -1 })
+      .limit(7)
+      .populate("author", "username");
     res.status(200).json(popularPosts);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch popular posts" });
