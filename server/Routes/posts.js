@@ -5,6 +5,9 @@ const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
 
+// middleware
+const authMiddleware = require("../middleware/auth");
+
 // Get all posts
 // url: /posts
 router.get("/", async (req, res) => {
@@ -20,20 +23,12 @@ router.get("/", async (req, res) => {
 
 // Create post
 // url: /posts
-router.post("/", async (req, res) => {
-  const { petName, category, imageUrl, author } = req.body;
+router.post("/", authMiddleware, async (req, res) => {
+  const { petName, category, imageUrl } = req.body;
 
-  if (!mongoose.isValidObjectId(author)) {
-    return res.status(400).json({ error: "Invalid author/user ID" });
-  }
+  const author = req.user.id;
 
   try {
-    const userExist = await User.findById(author);
-
-    if (!userExist) {
-      return res.status(400).json({ error: "Author/user ID was not found" });
-    }
-
     const newPost = await Post.create({ petName, category, imageUrl, author });
     res.status(201).json(newPost);
   } catch (error) {
@@ -43,7 +38,7 @@ router.post("/", async (req, res) => {
 
 // Like post
 // url: /posts/:id/like
-router.patch("/:id/like", async (req, res) => {
+router.patch("/:id/like", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
