@@ -7,6 +7,8 @@ const router = express.Router();
 
 // middleware
 const authMiddleware = require("../middleware/auth");
+const checkPermission = require("../middleware/checkPermission");
+const Comment = require("../models/Comment");
 
 // Get all posts
 // url: /posts
@@ -24,12 +26,18 @@ router.get("/", async (req, res) => {
 // Create post
 // url: /posts
 router.post("/", authMiddleware, async (req, res) => {
-  const { petName, category, imageUrl } = req.body;
+  const { petName, category, imageUrl, caption } = req.body;
 
   const author = req.user.id;
 
   try {
-    const newPost = await Post.create({ petName, category, imageUrl, author });
+    const newPost = await Post.create({
+      petName,
+      category,
+      imageUrl,
+      author,
+      caption,
+    });
     res.status(201).json(newPost);
   } catch (error) {
     res.status(500).json({ error: "Failed to create post" });
@@ -69,6 +77,54 @@ router.get("/popular", async (req, res) => {
     res.status(200).json(popularPosts);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch popular posts" });
+  }
+});
+
+router.delete("/:id", authMiddleware, checkPermission, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedPost = await Post.findByIdAndDelete(id);
+
+    if (!deletedPost) {
+      return res.status(404).json({ error: "Target post was not found" });
+    }
+
+    const deleteComments = await Comment.deleteMany({ postId: id });
+
+    res.status(200).json(deletedPost);
+  } catch (error) {
+    res.status(500).json({ error: "Cannot delete the post" });
+  }
+});
+
+router.put("/:id", authMiddleware, checkPermission, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { petName, caption, imageUrl, category } = req.body;
+
+    if (!petName?.trim() || !category?.trim() || !imageUrl?.trim()) {
+      return res.status(400).json({ error: "Required field cannot be blank" });
+    }
+
+    const editedPost = await Post.findByIdAndUpdate(
+      id,
+      {
+        petName,
+        caption,
+        imageUrl,
+        category,
+      },
+      { new: true }
+    );
+
+    if (!editedPost) {
+      return res.status(404).json({ error: "Target post was not found" });
+    }
+
+    res.status(200).json({ editedPost });
+  } catch (error) {
+    res.status(500).json({ error: "Cannot edit the post" });
   }
 });
 

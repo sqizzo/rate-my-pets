@@ -14,9 +14,38 @@ router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "Missing username/email/password" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ error: "Please provide a valid password" });
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      return res
+        .status(400)
+        .json({ error: "Please provide a valid email format" });
+    }
+
+    const emailTrimmed = email?.trim().toLowerCase();
+    const usernameTrimmed = username?.trim();
+    const passwordTrimmed = password?.trim();
+
+    const isEmailExists = await User.findOne({ email: emailTrimmed });
+    const isUserNameExists = await User.findOne({ username: usernameTrimmed });
+
+    if (isEmailExists || isUserNameExists) {
+      return res.status(400).json({ error: "User/email already exist!" });
+    }
+
     const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-    const newUser = await User.create({ username, email, passwordHash });
+    const passwordHash = await bcrypt.hash(passwordTrimmed, saltRounds);
+    const newUser = await User.create({
+      username: usernameTrimmed,
+      email: emailTrimmed,
+      passwordHash,
+    });
 
     res.status(201).json({
       message: "User registered succesfully",
@@ -33,13 +62,20 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({ error: "Please provide email and password" });
+  }
+
+  const emailTrimmed = email?.trim().toLowerCase();
+  const passwordTrimmed = password?.trim();
+
   try {
-    const userExist = await User.findOne({ email });
+    const userExist = await User.findOne({ email: emailTrimmed });
     if (!userExist) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     const passwordCorrect = await bcrypt.compare(
-      password,
+      passwordTrimmed,
       userExist.passwordHash
     );
     if (!passwordCorrect) {
