@@ -70,10 +70,58 @@ router.get("/", async (req, res) => {
     return res.status(400).json({ error: "Missing token in query" });
   }
 
-  try {
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res
+      .status(400)
+      .json({ error: "User not found or token already expired" });
   }
+
+  res.status(200).json({
+    message: "Token is valid",
+    userId: user._id,
+    email: user.email,
+  });
+});
+
+router.post("/confirm", async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    res.status(400).json({ error: "Token and password are required" });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ error: "Please provide a valid password" });
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res.status(400).json({ error: "Invalid or expired token" });
+  }
+
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(password, saltRounds);
+
+  user.passwordHash = passwordHash;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save();
+
+  res.status(200).json({ message: "Password reset successful" });
 });
 
 module.exports = router;
