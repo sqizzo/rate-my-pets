@@ -50,19 +50,57 @@ router.patch("/:id/like", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const likedPost = await Post.findByIdAndUpdate(
-      id,
-      { $inc: { likes: 1 } },
-      { new: true }
-    );
+    const likedById = req.user.id;
 
-    if (!likedPost) {
+    const post = await Post.findById(id);
+
+    if (!post) {
       return res.status(404).json({ error: "Target post was not found" });
     }
 
-    res.status(200).json(likedPost);
+    if (post.likedBy.includes(likedById)) {
+      return res.status(400).json({ error: "Post already liked by this user" });
+    }
+
+    post.likes += 1;
+    post.likedBy.push(likedById);
+    await post.save();
+
+    res.status(200).json(post);
   } catch (error) {
     res.status(500).json({ error: "Failed to like the post" });
+  }
+});
+
+// Unlike post
+// url: /posts/:id/unlike
+router.patch("/:id/unlike", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const likedById = req.user.id;
+
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ error: "Target post was not found" });
+    }
+
+    if (!post.likedBy.includes(likedById)) {
+      return res.status(400).json({ error: "Post was not liked by this user" });
+    }
+
+    const likedByIndex = post.likedBy.findIndex((id) =>
+      id.equals(mongoose.Types.ObjectId(likedById))
+    );
+
+    post.likes = Math.max(0, post.likes - 1);
+    post.likedBy.splice(likedByIndex, 1);
+    await post.save();
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to unlike the post" });
   }
 });
 

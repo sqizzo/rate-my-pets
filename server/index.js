@@ -11,9 +11,10 @@ const cors = require("cors");
 const PORT = process.env.PORT || 5000;
 
 // Routing
-const postsRouter = require("./Routes/posts");
-const commentsRouter = require("./Routes/comments");
-const authRouter = require("./Routes/auth");
+const postsRouter = require("./routes/posts");
+const commentsRouter = require("./routes/comments");
+const authRouter = require("./routes/auth");
+const resetPasswordRouter = require("./routes/passwordReset");
 
 // .Env config variable
 require("dotenv").config();
@@ -36,6 +37,7 @@ app.use(
 app.use("/api/posts", postsRouter);
 app.use("/api/comments", commentsRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/reset_password", resetPasswordRouter);
 
 // Testing
 app.get("/", (req, res) => {
