@@ -1,5 +1,7 @@
 // .Env config variable
-require('dotenv').config();
+
+require("dotenv").config();
+
 
 // Express: Web server
 const express = require('express');
@@ -18,10 +20,11 @@ const cors = require('cors');
 const PORT = process.env.PORT || 5000;
 
 // Routing
-const postsRouter = require('./routes/posts');
-const commentsRouter = require('./routes/comments');
-const authRouter = require('./routes/auth');
-const resetPasswordRouter = require('./Routes/passwordReset');
+const postsRouter = require("./routes/posts");
+const commentsRouter = require("./routes/comments");
+const authRouter = require("./routes/auth");
+const resetPasswordRouter = require("./Routes/passwordReset");
+
 
 // passport require
 require('./config/passport');
