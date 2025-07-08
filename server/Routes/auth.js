@@ -26,7 +26,8 @@ const sendVerificationEmail = async (email, token, username) => {
 		},
 	});
 
-	const verificationUrl = `http://localhost:3000/verify-email?token=${token}`;
+	const port = process.env.PORT || 5000;
+	const verificationUrl = `http://localhost:${port}/api/auth/verify-email?token=${token}`;
 
 	const message = {
 		from: '"RateMyPets Support" <support@ratemypets.com>',

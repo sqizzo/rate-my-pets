@@ -30,7 +30,10 @@ require("./config/passport");
 const app = express();
 
 // Allow access for another project/domain like the frontend
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
 
 // For reading JSON from body request
 app.use(express.json());

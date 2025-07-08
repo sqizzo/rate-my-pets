@@ -28,7 +28,7 @@ const NavItem = ({ icon, text, active, onClick }) => (
   </li>
 );
 
-const LeftSidebar = ({ user, onLogout }) => {
+const LeftSidebar = ({ user, onLogout, onAddPost }) => {
   const navItems = [
     { icon: <Home />, text: "Home", active: true },
     { icon: <Search />, text: "Search" },
@@ -36,7 +36,7 @@ const LeftSidebar = ({ user, onLogout }) => {
     { icon: <Clapperboard />, text: "Reels" },
     { icon: <MessageCircle />, text: "Messages" },
     { icon: <Heart />, text: "Notifications" },
-    { icon: <PlusSquare />, text: "Create" },
+    { icon: <PlusSquare />, text: "Create", onClick: onAddPost },
     { icon: <UserCircle />, text: "Profile" },
   ];
 
