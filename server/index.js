@@ -1,30 +1,30 @@
+// .Env config variable
+require('dotenv').config();
+
 // Express: Web server
-const express = require("express");
+const express = require('express');
 
 // Passport
-const passport = require("passport");
+const passport = require('passport');
 
 // Mongoose: ODM for MongoDB
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 // Morgan: Logger
-const morgan = require("morgan");
+const morgan = require('morgan');
 
 // Cors: For front end accessing API
-const cors = require("cors");
+const cors = require('cors');
 
 const PORT = process.env.PORT || 5000;
 
 // Routing
-const postsRouter = require("./routes/posts");
-const commentsRouter = require("./routes/comments");
-const authRouter = require("./routes/auth");
-const resetPasswordRouter = require("./Routes/passwordReset");
-
-// .Env config variable
-require("dotenv").config();
+const postsRouter = require('./routes/posts');
+const commentsRouter = require('./routes/comments');
+const authRouter = require('./routes/auth');
+const resetPasswordRouter = require('./Routes/passwordReset');
 
 // passport require
-require("./config/passport");
+require('./config/passport');
 
 // Making server object
 const app = express();
@@ -39,33 +39,33 @@ app.use(passport.initialize());
 
 // Morgan for Logging
 app.use(
-  morgan(":method :url :status :res[content-length] - :response-time ms")
+	morgan(':method :url :status :res[content-length] - :response-time ms')
 );
 
 // Routes
-app.use("/api/posts", postsRouter);
-app.use("/api/comments", commentsRouter);
-app.use("/api/auth", authRouter);
-app.use("/api/reset_password", resetPasswordRouter);
+app.use('/api/posts', postsRouter);
+app.use('/api/comments', commentsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/reset_password', resetPasswordRouter);
 
 // Testing
-app.get("/", (req, res) => {
-  res.send("RateMyPets API is running!");
+app.get('/', (req, res) => {
+	res.send('RateMyPets API is running!');
 });
 
 mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`---- START ----
+	.connect(process.env.MONGODB_URI)
+	.then(() => {
+		app.listen(PORT, () => {
+			console.log(`---- START ----
 Connection to MongoDB was established!
 Server running on port ${PORT}
 Logging started :)
 ---- LOG ----`);
-    });
-  })
-  .catch((err) => {
-    console.log("Connection to MongoDB was failed:", err.message);
-  });
+		});
+	})
+	.catch((err) => {
+		console.log('Connection to MongoDB was failed:', err.message);
+	});
 
 // Routing
