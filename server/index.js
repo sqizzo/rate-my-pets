@@ -1,5 +1,9 @@
 // Express: Web server
 const express = require("express");
+
+// Passport
+const passport = require("passport");
+
 // Mongoose: ODM for MongoDB
 const mongoose = require("mongoose");
 // Morgan: Logger
@@ -14,10 +18,13 @@ const PORT = process.env.PORT || 5000;
 const postsRouter = require("./routes/posts");
 const commentsRouter = require("./routes/comments");
 const authRouter = require("./routes/auth");
-const resetPasswordRouter = require("./routes/passwordReset");
+const resetPasswordRouter = require("./Routes/passwordReset");
 
 // .Env config variable
 require("dotenv").config();
+
+// passport require
+require("./config/passport");
 
 // Making server object
 const app = express();
@@ -27,6 +34,8 @@ app.use(cors());
 
 // For reading JSON from body request
 app.use(express.json());
+
+app.use(passport.initialize());
 
 // Morgan for Logging
 app.use(

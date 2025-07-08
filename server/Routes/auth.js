@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const User = require("../models/User");
 
 // bcrypt for hashing password
@@ -7,6 +8,33 @@ const bcrypt = require("bcrypt");
 
 // JWT
 const jwt = require("jsonwebtoken");
+
+// Passport
+const passport = require("passport");
+
+// Google OAuth 2.0
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req, res) => {
+    const payload = {
+      id: req.user._id,
+      username: req.user.username,
+      role: req.user.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.redirect(`http://localhost:3000/oauth-success?token=${token}`);
+  }
+);
 
 // Register user
 // url: /register
