@@ -9,7 +9,7 @@ const Feed = ({ storiesData }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/posts")
+    fetch("http://localhost:3005/api/posts")
       .then((res) => res.json())
       .then(async (data) => {
         setPostsData(data);
@@ -24,7 +24,7 @@ const Feed = ({ storiesData }) => {
         // setDogImages(images);
         // Fetch comments for each post
         const commentsPromises = data.map((post) =>
-          fetch(`http://localhost:5000/api/comments/${post._id}`)
+          fetch(`http://localhost:3005/api/comments/${post._id}`)
             .then((res) => res.json())
             .catch(() => [])
         );
