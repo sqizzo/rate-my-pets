@@ -9,14 +9,16 @@ const Feed = ({ storiesData, user, refreshFlag, onEditPost, onRefresh }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     setLoading(true);
     fetch("http://localhost:5000/api/posts")
+
       .then((res) => res.json())
       .then(async (data) => {
         setPostsData(data);
         // Fetch comments for each post
         const commentsPromises = data.map((post) =>
-          fetch(`http://localhost:5000/api/comments/${post._id}`)
+          fetch(`http://localhost:3005/api/comments/${post._id}`)
             .then((res) => res.json())
             .catch(() => [])
         );
