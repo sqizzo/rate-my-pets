@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
 
 // Create post
 // url: /posts
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", async (req, res) => {
   const { petName, category, imageUrl, caption } = req.body;
 
   const author = req.user.id;
@@ -46,7 +46,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
 // Like post
 // url: /posts/:id/like
-router.patch("/:id/like", authMiddleware, async (req, res) => {
+router.patch("/:id/like", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -74,7 +74,7 @@ router.patch("/:id/like", authMiddleware, async (req, res) => {
 
 // Unlike post
 // url: /posts/:id/unlike
-router.patch("/:id/unlike", authMiddleware, async (req, res) => {
+router.patch("/:id/unlike", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -118,7 +118,7 @@ router.get("/popular", async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, checkPermission, async (req, res) => {
+router.delete("/:id", checkPermission, async (req, res) => {
   try {
     const { id } = req.params;
 
