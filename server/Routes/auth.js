@@ -1,3 +1,5 @@
+// // .Env config variable
+// require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 
@@ -26,7 +28,9 @@ const sendVerificationEmail = async (email, token, username) => {
 		},
 	});
 
-	const verificationUrl = `http://localhost:3000/verify-email?token=${token}`;
+	// Use environment variables for host and port, fallback to localhost and PORT
+	const port = process.env.PORT || 5000;
+	const verificationUrl = `http://localhost:${port}/api/auth/verify-email?token=${token}`;
 
 	const message = {
 		from: '"RateMyPets Support" <support@ratemypets.com>',
@@ -45,30 +49,30 @@ const sendVerificationEmail = async (email, token, username) => {
 };
 
 // Passport
-const passport = require("passport");
+const passport = require('passport');
 
 // Google OAuth 2.0
 router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+	'/google',
+	passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
 router.get(
-  "/google/callback",
-  passport.authenticate("google", { session: false }),
-  (req, res) => {
-    const payload = {
-      id: req.user._id,
-      username: req.user.username,
-      role: req.user.role,
-    };
+	'/google/callback',
+	passport.authenticate('google', { session: false }),
+	(req, res) => {
+		const payload = {
+			id: req.user._id,
+			username: req.user.username,
+			role: req.user.role,
+		};
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+		const token = jwt.sign(payload, process.env.JWT_SECRET, {
+			expiresIn: '7d',
+		});
 
-    res.redirect(`http://localhost:3000/oauth-success?token=${token}`);
-  }
+		res.redirect(`http://localhost:3000/oauth-success?token=${token}`);
+	}
 );
 
 // Register user
