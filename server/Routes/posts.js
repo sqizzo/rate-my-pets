@@ -74,10 +74,10 @@ router.patch("/:id/like", authMiddleware, async (req, res) => {
 
 // Unlike post
 // url: /posts/:id/unlike
+
 router.patch("/:id/unlike", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-
     const likedById = req.user.id;
 
     const post = await Post.findById(id);
@@ -86,12 +86,16 @@ router.patch("/:id/unlike", authMiddleware, async (req, res) => {
       return res.status(404).json({ error: "Target post was not found" });
     }
 
-    if (!post.likedBy.includes(likedById)) {
+    const alreadyLiked = post.likedBy.some((userId) =>
+      userId.equals(likedById)
+    );
+
+    if (!alreadyLiked) {
       return res.status(400).json({ error: "Post was not liked by this user" });
     }
 
-    const likedByIndex = post.likedBy.findIndex((id) =>
-      id.equals(mongoose.Types.ObjectId(likedById))
+    const likedByIndex = post.likedBy.findIndex((userId) =>
+      userId.equals(likedById)
     );
 
     post.likes = Math.max(0, post.likes - 1);

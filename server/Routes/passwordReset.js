@@ -8,6 +8,10 @@ const User = require("../models/User");
 router.post("/", async (req, res) => {
   const { email } = req.body;
 
+  if (!email || !email.includes("@")) {
+    return res.status(400).json({ error: "Please provide a valid email" });
+  }
+
   try {
     const user = await User.findOne({ email });
 
@@ -28,11 +32,11 @@ router.post("/", async (req, res) => {
     await user.save();
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        user: "kelli61@ethereal.email",
-        pass: "tk1mjsywZy95ZU3ENj",
+        user: process.env.MAILTRAP_USER,
+        pass: process.env.MAILTRAP_PASS,
       },
     });
 
@@ -59,6 +63,17 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {});
+router.get("/", async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ error: "Missing token in query" });
+  }
+
+  try {
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;
