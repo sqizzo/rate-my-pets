@@ -2,26 +2,20 @@ import React, { useEffect, useState } from "react";
 import Stories from "./Stories";
 import Post from "./Post";
 
-const Feed = ({ storiesData }) => {
+const Feed = ({ storiesData, user, refreshFlag, onEditPost, onRefresh }) => {
   const [postsData, setPostsData] = useState([]);
   const [dogImages, setDogImages] = useState([]);
   const [commentsByPost, setCommentsByPost] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3005/api/posts")
+
+    setLoading(true);
+    fetch("http://localhost:5000/api/posts")
+
       .then((res) => res.json())
       .then(async (data) => {
         setPostsData(data);
-        // Fetch a random dog image for each post
-        // const dogImagePromises = data.map(() =>
-        //   fetch("https://random.dog/woof.json?ref=apilist.fun")
-        //     .then((res) => res.json())
-        //     .then((dogData) => dogData.url)
-        //     .catch(() => null)
-        // );
-        // const images = await Promise.all(dogImagePromises);
-        // setDogImages(images);
         // Fetch comments for each post
         const commentsPromises = data.map((post) =>
           fetch(`http://localhost:3005/api/comments/${post._id}`)
@@ -41,7 +35,18 @@ const Feed = ({ storiesData }) => {
         setLoading(false);
         // handle error
       });
-  }, []);
+  }, [refreshFlag]);
+
+  // Add a function to refresh comments for a single post
+  const refreshCommentsForPost = async (postId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/comments/${postId}`);
+      const comments = await res.json();
+      setCommentsByPost((prev) => ({ ...prev, [postId]: comments }));
+    } catch {
+      // Optionally handle error
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
 
@@ -57,6 +62,10 @@ const Feed = ({ storiesData }) => {
                 post={post}
                 dogImage={post.imageUrl}
                 comments={commentsByPost[post._id] || []}
+                onCommentAdded={() => refreshCommentsForPost(post._id)}
+                user={user}
+                onEdit={() => onEditPost && onEditPost(post)}
+                onDeleted={onRefresh}
               />
             ))}
           </div>

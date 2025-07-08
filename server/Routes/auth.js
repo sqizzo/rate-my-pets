@@ -10,6 +10,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 // Crypto for generating verification tokens
+
 const crypto = require("crypto");
 
 const sendVerificationEmail = require("../utils/sendVerificationEmail");
