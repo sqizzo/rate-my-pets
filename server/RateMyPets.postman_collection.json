@@ -1,0 +1,376 @@
+{
+	"info": {
+		"_postman_id": "3b6d467d-5284-464e-b5aa-b3f91dafd484",
+		"name": "RateMyPets",
+		"description": "RateMyPets API testing collection :)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46298576",
+		"_collection_link": "https://muhamadnurbaihaqi.postman.co/workspace/Muhamad-Nur-Baihaqi's-Workspace~6ac3a2a8-149a-44be-873c-132666d83eed/collection/46298576-3b6d467d-5284-464e-b5aa-b3f91dafd484?action=share&source=collection_link&creator=46298576"
+	},
+	"item": [
+		{
+			"name": "Posts",
+			"item": [
+				{
+					"name": "Get All Post",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": ["{{baseUrl}}"],
+							"path": ["posts"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Most Popular Post",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts/popular",
+							"host": ["{{baseUrl}}"],
+							"path": ["posts", "popular"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n  \"author\": \"68655e3316d8df5af1045fcf\",\r\n  \"petName\": \"Simon\",\r\n  \"category\": \"dog\",\r\n  \"imageUrl\": \"https://example.com/simon.jpg\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": ["{{baseUrl}}"],
+							"path": ["posts"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Like Specific Post",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjU1ZTMzMTZkOGRmNWFmMTA0NWZjZiIsInVzZXJuYW1lIjoiYnVkaSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUxNjAwNzM4LCJleHAiOjE3NTIyMDU1Mzh9.CHqwUtoMi5EOCQzlAR6Z3kzXzDRHapPbFbqH7koqZS8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/posts/68656089460de0908685a1d8/like",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"posts",
+								"68656089460de0908685a1d8",
+								"like"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Like Specific Post Copy",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjU1ZTMzMTZkOGRmNWFmMTA0NWZjZiIsInVzZXJuYW1lIjoiYnVkaSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUxNjAwNzM4LCJleHAiOjE3NTIyMDU1Mzh9.CHqwUtoMi5EOCQzlAR6Z3kzXzDRHapPbFbqH7koqZS8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/posts/686c98240e9031b35dd0b7b8/unlike",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"posts",
+								"686c98240e9031b35dd0b7b8",
+								"unlike"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Post",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Njc4MjlhYWMyZTQxNmNmNDk3OTVhNSIsInVzZXJuYW1lIjoic3FpenpvIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxODU2OTQ3LCJleHAiOjE3NTI0NjE3NDd9.ZZkzI_48cFVM7pFxwxClP7uatfUtAsHkgDKAymwNxgo",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/posts/68656089460de0908685a1d8",
+							"host": ["{{baseUrl}}"],
+							"path": ["posts", "68656089460de0908685a1d8"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n  \"username\": \"contactrasya\",\r\n  \"email\": \"contactrasya@gmail.com\",\r\n  \"password\": \"12345678\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": [],
+					"description": "Register a new user. Email verification is required."
+				},
+				{
+					"name": "Register User Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n  \"username\": \"contactrasya2\",\r\n  \"email\": \"contactrasya@gmail.com\",\r\n  \"password\": \"12345678\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": [],
+					"description": "Register a new user. Email verification is required."
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n  \"email\": \"sqizzo@admin.com\",\r\n  \"password\": \"sqizzoadmin123\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": [],
+					"description": "Login a user. Email verification is required."
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/verify-email?token=your_verification_token_here",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "verify-email"],
+							"query": [
+								{
+									"key": "token",
+									"value": "your_verification_token_here"
+								}
+							]
+						}
+					},
+					"response": [],
+					"description": "Verify a user's email address. Paste the token from the verification email."
+				},
+				{
+					"name": "Resend Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"contactrasya@gmail.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/resend-verification",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "resend-verification"]
+						}
+					},
+					"response": [],
+					"description": "Resend the email verification link to a user's email address."
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Post Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"text\": \"what a cool dog!\",\r\n    \"author\": \"68655e3316d8df5af1045fcf\",\r\n    \"postId\": \"68656089460de0908685a1d8\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/comments",
+							"host": ["{{baseUrl}}"],
+							"path": ["comments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Comment from a Post",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/comments/68656089460de0908685a1d2",
+							"host": ["{{baseUrl}}"],
+							"path": ["comments", "68656089460de0908685a1d2"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Password Reset",
+			"item": [
+				{
+					"name": "Post Password Reset",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"contactrasya@gmail.com\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/reset_password",
+							"host": ["{{baseUrl}}"],
+							"path": ["reset_password"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [""]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [""]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "localhost:5000/api",
+			"type": "string"
+		}
+	]
+}
