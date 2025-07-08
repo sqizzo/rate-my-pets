@@ -1,3 +1,4 @@
+require("dotenv").config();
 // Express: Web server
 const express = require("express");
 
@@ -21,7 +22,6 @@ const authRouter = require("./routes/auth");
 const resetPasswordRouter = require("./Routes/passwordReset");
 
 // .Env config variable
-require("dotenv").config();
 
 // passport require
 require("./config/passport");

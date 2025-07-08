@@ -7,7 +7,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENTID,
       clientSecret: process.env.GOOGLE_CLIENTSECRET,
-      callbackURL: "auth/google/callback", //endpoint redirect kemana ketika selesai login
+      callbackURL: "http://localhost:3005/api/auth/google/callback", //endpoint redirect kemana ketika selesai login
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -27,7 +27,7 @@ passport.use(
 
         return done(null, newUser);
       } catch (error) {
-        return done(null, error);
+        return done(error, null);
       }
     }
   )
