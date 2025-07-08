@@ -26,6 +26,7 @@ router.get('/', async (req, res) => {
 
 // Create post
 // url: /posts
+
 router.post(
 	'/',
 	authMiddleware,
@@ -83,6 +84,7 @@ router.patch('/:id/like', authMiddleware, async (req, res) => {
 // Unlike post
 // url: /posts/:id/unlike
 
+
 router.patch('/:id/unlike', authMiddleware, async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -132,9 +134,11 @@ router.get('/popular', async (req, res) => {
 	}
 });
 
+
 router.delete('/:id', authMiddleware, checkPermission, async (req, res) => {
 	try {
 		const { id } = req.params;
+
 
 		const deletedPost = await Post.findByIdAndDelete(id);
 
