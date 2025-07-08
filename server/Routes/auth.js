@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 const express = require("express");
-=======
-// // .Env config variable
-// require('dotenv').config();
-const express = require('express');
->>>>>>> e1ce64be1c5d7604f51a7cd857668a369af4598d
 const router = express.Router();
 
 const User = require("../models/User");
@@ -18,74 +12,33 @@ const jwt = require("jsonwebtoken");
 // Crypto for generating verification tokens
 const crypto = require("crypto");
 
-<<<<<<< HEAD
 const sendVerificationEmail = require("../utils/sendVerificationEmail");
-=======
-// Nodemailer for sending verification emails
-const nodemailer = require('nodemailer');
-
-// Helper function to send verification email
-const sendVerificationEmail = async (email, token, username) => {
-	const transporter = nodemailer.createTransport({
-		host: 'sandbox.smtp.mailtrap.io',
-		port: 2525,
-		auth: {
-			user: process.env.MAILTRAP_USER,
-			pass: process.env.MAILTRAP_PASS,
-		},
-	});
-
-	// Use environment variables for host and port, fallback to localhost and PORT
-	const port = process.env.PORT || 5000;
-	const verificationUrl = `http://localhost:${port}/api/auth/verify-email?token=${token}`;
-
-	const message = {
-		from: '"RateMyPets Support" <support@ratemypets.com>',
-		to: email,
-		subject: 'Verify your email address',
-		html: `
-      <h2>Welcome to RateMyPets, ${username}!</h2>
-      <p>Please verify your email address by clicking the link below:</p>
-      <a href="${verificationUrl}">${verificationUrl}</a>
-      <p>This link will expire in 24 hours.</p>
-      <p>If you didn't create an account, please ignore this email.</p>
-    `,
-	};
-
-	await transporter.sendMail(message);
-};
->>>>>>> e1ce64be1c5d7604f51a7cd857668a369af4598d
 
 // Passport
-const passport = require('passport');
+const passport = require("passport");
 
 // Google OAuth 2.0
 router.get(
-	'/google',
-	passport.authenticate('google', { scope: ['profile', 'email'] })
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 router.get(
-	'/google/callback',
-	passport.authenticate('google', { session: false }),
-	(req, res) => {
-		const payload = {
-			id: req.user._id,
-			username: req.user.username,
-			role: req.user.role,
-		};
+  "/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req, res) => {
+    const payload = {
+      id: req.user._id,
+      username: req.user.username,
+      role: req.user.role,
+    };
 
-		const token = jwt.sign(payload, process.env.JWT_SECRET, {
-			expiresIn: '7d',
-		});
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-<<<<<<< HEAD
     res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
   }
-=======
-		res.redirect(`http://localhost:3000/oauth-success?token=${token}`);
-	}
->>>>>>> e1ce64be1c5d7604f51a7cd857668a369af4598d
 );
 
 // Register user
