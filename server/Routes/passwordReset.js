@@ -8,6 +8,10 @@ const User = require("../models/User");
 router.post("/", async (req, res) => {
   const { email } = req.body;
 
+  if (!email || !email.includes("@")) {
+    return res.status(400).json({ error: "Please provide a valid email" });
+  }
+
   try {
     const user = await User.findOne({ email });
 
@@ -28,11 +32,11 @@ router.post("/", async (req, res) => {
     await user.save();
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        user: "kelli61@ethereal.email",
-        pass: "tk1mjsywZy95ZU3ENj",
+        user: process.env.MAILTRAP_USER,
+        pass: process.env.MAILTRAP_PASS,
       },
     });
 
@@ -59,6 +63,65 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {});
+router.get("/", async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ error: "Missing token in query" });
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res
+      .status(400)
+      .json({ error: "User not found or token already expired" });
+  }
+
+  res.status(200).json({
+    message: "Token is valid",
+    userId: user._id,
+    email: user.email,
+  });
+});
+
+router.post("/confirm", async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    res.status(400).json({ error: "Token and password are required" });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ error: "Please provide a valid password" });
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res.status(400).json({ error: "Invalid or expired token" });
+  }
+
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(password, saltRounds);
+
+  user.passwordHash = passwordHash;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save();
+
+  res.status(200).json({ message: "Password reset successful" });
+});
 
 module.exports = router;
