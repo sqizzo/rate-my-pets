@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Home,
   Search,
@@ -18,10 +18,10 @@ import {
 import LeftSidebar from "./components/sidebar";
 import Feed from "./components/Feed";
 import RightSidebar from "./components/RightSidebar";
+import Login from "./components/Login";
+import Register from "./components/Register";
 
 // Mock Data for the application
-
-
 
 const suggestionsData = [
   {
@@ -56,20 +56,58 @@ const suggestionsData = [
   },
 ];
 
-
 // Main App Component
 export default function App() {
+  const [auth, setAuth] = useState(() => {
+    // Optionally, load from localStorage for persistence
+    const stored = localStorage.getItem("auth");
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [showRegister, setShowRegister] = useState(false);
+
+  const handleLogin = (data) => {
+    setAuth(data);
+    localStorage.setItem("auth", JSON.stringify(data));
+  };
+
+  const handleLogout = () => {
+    setAuth(null);
+    localStorage.removeItem("auth");
+  };
+
+  // After successful registration, switch to login
+  const handleRegister = () => {
+    setShowRegister(false);
+  };
+
+  if (!auth) {
+    if (showRegister) {
+      return (
+        <Register
+          onRegister={handleRegister}
+          onShowLogin={() => setShowRegister(false)}
+        />
+      );
+    }
+    return (
+      <Login
+        onLogin={handleLogin}
+        onShowRegister={() => setShowRegister(true)}
+      />
+    );
+  }
+
   return (
     <div className="flex bg-white text-white min-h-screen font-sans">
       <div className="w-[220px]">
-        <LeftSidebar />
+        <LeftSidebar user={auth} onLogout={handleLogout} />
       </div>
       <div className="flex justify-center flex-1">
         <div className="w-[600px]">
-          <Feed />
+          <Feed user={auth} />
         </div>
         <div className="w-[320px]">
-          <RightSidebar suggestionsData={suggestionsData} />
+          <RightSidebar suggestionsData={suggestionsData} user={auth} />
         </div>
       </div>
     </div>

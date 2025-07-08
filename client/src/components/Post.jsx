@@ -8,7 +8,7 @@ import {
   Smile,
 } from "lucide-react";
 
-const Post = ({ post, dogImage }) => {
+const Post = ({ post, dogImage, comments }) => {
   // Format the createdAt date to a readable time (e.g., '2h ago')
   const getTimeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -81,10 +81,26 @@ const Post = ({ post, dogImage }) => {
           </span>
           {post.caption}
         </p>
-        {/* Comments placeholder, since API does not provide commentsCount */}
-        {/* <p className="text-gray-500 text-sm mt-2 cursor-pointer">
-          View all X comments
-        </p> */}
+        {/* Comments Section */}
+        <div className="mt-2">
+          {comments === undefined ? (
+            <p className="text-gray-400 text-sm">Loading comments...</p>
+          ) : comments.length === 0 ? (
+            <p className="text-gray-400 text-sm">No comments yet.</p>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment._id} className="flex items-start mb-1">
+                <span className="font-bold mr-2 text-sm">
+                  {comment.author?.username || "User"}
+                </span>
+                <span className="text-sm">{comment.text}</span>
+                <span className="text-gray-400 text-xs ml-2">
+                  • {getTimeAgo(comment.createdAt)}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
         <div className="flex items-center mt-2">
           <input
             type="text"

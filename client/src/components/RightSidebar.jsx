@@ -73,7 +73,7 @@ const RightSidebar = ({ suggestionsData }) => (
           Language
         </a>
       </p>
-      <p className="mt-4">© 2024 INSTAGRAM FROM META</p>
+      <p className="mt-4">© 2025 Masih Mikir</p>
     </footer>
   </aside>
 );
