@@ -1,188 +1,94 @@
-import React, { useState } from "react";
-import {
-  Home,
-  Search,
-  Compass,
-  Clapperboard,
-  MessageCircle,
-  Heart,
-  PlusSquare,
-  UserCircle,
-  MoreHorizontal,
-  Send,
-  Bookmark,
-  Smile,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import LeftSidebar from "./components/sidebar";
-import Feed from "./components/Feed";
-import RightSidebar from "./components/RightSidebar";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from "react-router-dom";
+import NavBar from "./components/Navbar";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import Feed from "./components/Feed";
 import PostForm from "./components/PostForm";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+import NotFound from "./components/NotFound";
 
-// Mock Data for the application
+function App() {
+  // State untuk menyimpan informasi user dan loading
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showPostForm, setShowPostForm] = useState(false); // State modal PostForm
 
-const suggestionsData = [
-  {
-    id: 1,
-    user: "indieaprimet",
-    followedBy: "anqqiwei + 14 more",
-    avatar: "https://placehold.co/48x48/5DADE2/000000?text=I",
-  },
-  {
-    id: 2,
-    user: "giggis.du",
-    followedBy: "khairun + 18 more",
-    avatar: "https://placehold.co/48x48/48C9B0/000000?text=G",
-  },
-  {
-    id: 3,
-    user: "ingridhuiberkl",
-    followedBy: "kenzie + 9 more",
-    avatar: "https://placehold.co/48x48/AF7AC5/FFFFFF?text=IH",
-  },
-  {
-    id: 4,
-    user: "cimitao",
-    followedBy: "vinacikus + 3 more",
-    avatar: "https://placehold.co/48x48/F7DC6F/000000?text=C",
-  },
-  {
-    id: 5,
-    user: "muhayu",
-    followedBy: "yudhayst + 24 more",
-    avatar: "https://placehold.co/48x48/F0B27A/000000?text=M",
-  },
-];
+  // Cek apakah ada token di localStorage saat aplikasi dimuat
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
-// Main App Component
-export default function App() {
-  const [auth, setAuth] = useState(() => {
-    // Optionally, load from localStorage for persistence
-    const stored = localStorage.getItem("auth");
-    return stored ? JSON.parse(stored) : null;
-  });
-  const [showRegister, setShowRegister] = useState(false);
-  const [showPostForm, setShowPostForm] = useState(false);
-  const [postFormMode, setPostFormMode] = useState("add");
-  const [postFormInitial, setPostFormInitial] = useState({});
-  const [submittingPost, setSubmittingPost] = useState(false);
-  const [refreshFeedFlag, setRefreshFeedFlag] = useState(0);
-
-  const handleLogin = (data) => {
-    setAuth(data);
-    localStorage.setItem("auth", JSON.stringify(data));
-  };
-
-  const handleLogout = () => {
-    setAuth(null);
-    localStorage.removeItem("auth");
-  };
-
-  // After successful registration, switch to login
-  const handleRegister = () => {
-    setShowRegister(false);
-  };
-
-  // Show add post modal
-  const handleAddPost = () => {
-    setPostFormMode("add");
-    setPostFormInitial({});
-    setShowPostForm(true);
-  };
-
-  // Show edit post modal
-  const handleEditPost = (post) => {
-    setPostFormMode("edit");
-    setPostFormInitial(post);
-    setShowPostForm(true);
-  };
-
-  // Handle add/edit post submit
-  const handlePostFormSubmit = async (formData) => {
-    setSubmittingPost(true);
-    try {
-      const url =
-        postFormMode === "edit"
-          ? `http://localhost:5000/api/posts/${postFormInitial._id}`
-          : "http://localhost:5000/api/posts";
-      const method = postFormMode === "edit" ? "PUT" : "POST";
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          ...(auth?.token ? { Authorization: `Bearer ${auth.token}` } : {}),
-        },
-        body: JSON.stringify(formData),
-        credentials: "include",
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || "Failed to save post");
-        return;
+  // Redirect ke '/' jika user sudah login dan akses /login
+  function LoginRedirector() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    useEffect(() => {
+      if (user && location.pathname === '/login') {
+        navigate('/');
       }
-      setShowPostForm(false);
-      setRefreshFeedFlag((f) => f + 1);
-    } finally {
-      setSubmittingPost(false);
-    }
-  };
-
-  // Refresh feed after add/edit/delete
-  const handleRefreshFeed = () => {
-    setRefreshFeedFlag((f) => f + 1);
-  };
-
-  if (!auth) {
-    if (showRegister) {
-      return (
-        <Register
-          onRegister={handleRegister}
-          onShowLogin={() => setShowRegister(false)}
-        />
-      );
-    }
-    return (
-      <Login
-        onLogin={handleLogin}
-        onShowRegister={() => setShowRegister(true)}
-      />
-    );
+    }, [user, location, navigate]);
+    return null;
   }
 
+  // Fungsi onLogin yang menangani login dan menyimpan data user
+  const handleLogin = (userData) => {
+    // Simpan token dan data user ke localStorage
+    localStorage.setItem('token', userData.token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  // Fungsi untuk logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  // Fungsi untuk refresh feed setelah post baru
+  const handlePostCreated = () => {
+    setShowPostForm(false);
+    // Bisa tambahkan trigger refresh feed jika perlu
+  };
+
+  // Fungsi untuk menampilkan forgot password
+  const handleShowForgotPassword = () => {
+    // Navigate to forgot password page instead of showing modal
+    window.location.href = '/forgot-password';
+  };
+
+  // Fungsi untuk kembali ke login dari forgot password
+  const handleBackToLogin = () => {
+    window.location.href = '/login';
+  };
+
   return (
-    <div className="flex bg-white text-white min-h-screen font-sans">
-      <div className="w-[220px]">
-        <LeftSidebar
-          user={auth}
-          onLogout={handleLogout}
-          onAddPost={handleAddPost}
-        />
-      </div>
-      <div className="flex justify-center flex-1">
-        <div className="w-[600px]">
-          <Feed
-            user={auth}
-            refreshFlag={refreshFeedFlag}
-            onEditPost={handleEditPost}
-            onRefresh={handleRefreshFeed}
-          />
-        </div>
-        <div className="w-[320px]">
-          <RightSidebar suggestionsData={suggestionsData} user={auth} />
-        </div>
-      </div>
+    <Router>
+      <LoginRedirector />
+      {user && <NavBar user={user} onLogout={handleLogout} onOpenPostForm={() => setShowPostForm(true)} />}
+      <Routes>
+        <Route path="/" element={user ? <Feed /> : <Login onLogin={handleLogin} loading={loading} onShowForgotPassword={handleShowForgotPassword} />} />
+        <Route path="/login" element={<Login onLogin={handleLogin} loading={loading} onShowForgotPassword={handleShowForgotPassword} />} />
+        <Route path="/register" element={<Register onRegister={handleLogin} loading={loading} />} />
+        <Route path="/forgot-password" element={<ForgotPassword onBackToLogin={handleBackToLogin} />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       {showPostForm && (
         <PostForm
-          mode={postFormMode}
-          initialValues={postFormInitial}
-          onSubmit={handlePostFormSubmit}
-          onCancel={() => setShowPostForm(false)}
-          submitting={submittingPost}
+          onPostCreated={handlePostCreated}
+          onClose={() => setShowPostForm(false)}
         />
       )}
-    </div>
+    </Router>
   );
 }
+
+export default App;

@@ -1,87 +1,99 @@
-import React, { useState } from "react";
+// src/components/Login.jsx
+import React, { useState, useEffect } from "react";
 import logo from "../assets/logo.png";
-import cats from "../assets/cats.png";
+import * as api from "../api/api"; 
+import { useNavigate } from "react-router-dom"; 
 
-export default function Login({ onLogin, onShowRegister }) {
+const Login = ({ onLogin, loading, onShowForgotPassword }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null); 
+
+  const navigate = useNavigate(); 
+
+  // Tambahkan useEffect untuk redirect jika sudah login
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+
     try {
-      const res = await fetch("http://localhost:3005/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        onLogin(data); // Pass token/user info up
-      } else {
-        setError(data.error || "Login failed");
-      }
-    } catch (err) {
-      setError("Network error");
+      const response = await api.loginUser(email, password); // Menggunakan api.js
+      onLogin(response); 
+
+      navigate("/"); 
+    } catch (error) {
+      setError(error.message); 
     }
   };
 
   return (
-    <div className="flex flex-row items-center justify-center min-h-screen min-w-screen">
-      <div className="mr-8">
-        <img src={cats} alt="cats" className="w-100 h-100 object-contain" />
-      </div>
-      <div>
-        <form
-          onSubmit={handleSubmit}
-          className="w-100 h-120 mx-auto mt-10 p-4 border rounded border-gray-300"
-        >
-          <img
-            src={logo}
-            alt="logo"
-            className="w-48 h-24 mx-auto mb-4 object-contain"
-          />
-          {error && <div className="text-red-500 mb-2">{error}</div>}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8">
+      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow p-8 flex flex-col items-center">
+        <img src={logo} alt="Logo" />
+        <form className="w-full flex flex-col" onSubmit={handleSubmit}>
           <input
-            className="block w-full mb-2 p-2 border rounded border-gray-300"
             type="email"
             placeholder="Email"
+            className="mb-2 px-3 py-2 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input
-            className="block w-full mb-2 p-2 border rounded border-gray-300"
             type="password"
             placeholder="Password"
+            className="mb-3 px-3 py-2 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
           <button
-            className="w-full bg-blue-500 text-white p-2 rounded-xl"
             type="submit"
+            className="bg-blue-500 text-white font-semibold py-2 rounded mt-1 hover:bg-blue-600 transition disabled:opacity-50"
+            disabled={loading}
           >
-            Login
+            {loading ? "Signn in..." : "Sign In"}
           </button>
-          <div className="flex flex-row items-center justify-center my-5">
-            <div className="w-1/2 h-px bg-gray-300" />
-            <span className="text-gray-500 mx-2">OR</span>
-            <div className="w-1/2 h-px bg-gray-300" />
-          </div>
-          <div className="mt-4 text-center text-sm">
-            Don't have an account?{" "}
-            <button
-              type="button"
-              className="text-blue-600 underline hover:text-blue-800"
-              onClick={onShowRegister}
-            >
-              Sign Up
-            </button>
-          </div>
         </form>
+        {/* Tombol Login Google */}
+        <button
+          type="button"
+          onClick={api.startGoogleOAuth}
+          className="w-full flex items-center justify-center mt-4 py-2 px-4 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-100 transition-colors duration-200 shadow"
+        >
+          <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.23l6.85-6.85C36.13 2.36 30.45 0 24 0 14.82 0 6.73 5.8 2.69 14.09l7.98 6.2C12.33 13.13 17.68 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.01l7.19 5.59C43.93 37.13 46.1 31.36 46.1 24.55z"/><path fill="#FBBC05" d="M10.67 28.29c-1.13-3.36-1.13-6.97 0-10.33l-7.98-6.2C.7 16.09 0 19.95 0 24c0 4.05.7 7.91 2.69 12.24l7.98-6.2z"/><path fill="#EA4335" d="M24 48c6.45 0 12.13-2.13 16.19-5.81l-7.19-5.59c-2.01 1.35-4.59 2.15-9 2.15-6.32 0-11.67-3.63-13.33-8.79l-7.98 6.2C6.73 42.2 14.82 48 24 48z"/></g></svg>
+          Sign in with Google
+        </button>
+        
+        <button
+          type="button"
+          onClick={onShowForgotPassword}
+          className="text-blue-500 text-sm mt-3 hover:text-blue-600 transition-colors duration-200"
+        >
+          Forgot Password?
+        </button>
+        
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        <p className="text-sm mt-4">
+          Don't have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/register')}
+            className="text-blue-500 hover:underline"
+          >
+            Sign up here
+          </button>
+        </p>
       </div>
     </div>
   );
-}
+};
+
+export default Login;

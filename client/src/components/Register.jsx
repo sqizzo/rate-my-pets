@@ -1,90 +1,102 @@
-import React, { useState } from "react";
+// src/components/Register.jsx
+import React, { useState, useEffect } from "react";
+import logo from "../assets/logo.png";
+import api from "../api/api"; // Import api.js
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
-export default function Register({ onRegister, onShowLogin }) {
-  const [email, setEmail] = useState("");
+const Register = ({ onRegister, loading }) => {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // Menyimpan error jika ada
+
+  const navigate = useNavigate(); // Inisialisasi useNavigate
+
+  // Tambahkan useEffect untuk redirect jika sudah login
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
+
     try {
-      const res = await fetch("http://localhost:3005/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess("Registration successful! You can now log in.");
-        setEmail("");
-        setUsername("");
-        setPassword("");
-        if (onRegister) onRegister(data);
-      } else {
-        setError(data.error || "Registration failed");
-      }
-    } catch (err) {
-      setError("Network error");
+      // Menggunakan api.js untuk melakukan registrasi
+      const response = await api.registerUser(email, username, password);
+      onRegister(response); // Mengirim data respons ke parent component (App)
+
+      // Redirect ke halaman login setelah registrasi berhasil
+      navigate("/login");
+    } catch (error) {
+      setError(error.message); // Menangani error
     }
-    setLoading(false);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-xs mx-auto mt-10 p-4 border rounded"
-    >
-      <h2 className="text-lg font-bold mb-4">Register</h2>
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-      {success && <div className="text-green-600 mb-2">{success}</div>}
-      <input
-        className="block w-full mb-2 p-2 border rounded"
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        className="block w-full mb-2 p-2 border rounded"
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
-      <input
-        className="block w-full mb-2 p-2 border rounded"
-        type="password"
-        placeholder="Password (min 8 chars)"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        minLength={8}
-        required
-      />
-      <button
-        className="w-full bg-blue-500 text-white p-2 rounded"
-        type="submit"
-        disabled={loading}
-      >
-        {loading ? "Registering..." : "Register"}
-      </button>
-      <div className="mt-4 text-center text-sm">
-        Already have an account?{" "}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8">
+      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow p-8 flex flex-col items-center">
+        <img src={logo} alt="Logo" />
+        <form className="w-full flex flex-col" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Username"
+            className="mb-2 px-3 py-2 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            className="mb-2 px-3 py-2 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="mb-3 px-3 py-2 border rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white font-semibold py-2 rounded mt-1 hover:bg-blue-600 transition disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? "Signing up..." : "Sign Up"}
+          </button>
+        </form>
+        {/* Tombol Register Google */}
         <button
           type="button"
-          className="text-blue-600 underline hover:text-blue-800"
-          onClick={onShowLogin}
+          onClick={api.startGoogleOAuth}
+          className="w-full flex items-center justify-center mt-4 py-2 px-4 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-100 transition-colors duration-200 shadow"
         >
-          Login
+          <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.23l6.85-6.85C36.13 2.36 30.45 0 24 0 14.82 0 6.73 5.8 2.69 14.09l7.98 6.2C12.33 13.13 17.68 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.01l7.19 5.59C43.93 37.13 46.1 31.36 46.1 24.55z"/><path fill="#FBBC05" d="M10.67 28.29c-1.13-3.36-1.13-6.97 0-10.33l-7.98-6.2C.7 16.09 0 19.95 0 24c0 4.05.7 7.91 2.69 12.24l7.98-6.2z"/><path fill="#EA4335" d="M24 48c6.45 0 12.13-2.13 16.19-5.81l-7.19-5.59c-2.01 1.35-4.59 2.15-9 2.15-6.32 0-11.67-3.63-13.33-8.79l-7.98 6.2C6.73 42.2 14.82 48 24 48z"/></g></svg>
+          Sign up with Google
         </button>
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+        {/* Login Link */}
+        <p className="text-sm mt-4">
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="text-blue-500 hover:underline"
+          >
+            Sign in here
+          </button>
+        </p>
       </div>
-    </form>
+    </div>
   );
-}
+};
+
+export default Register;
