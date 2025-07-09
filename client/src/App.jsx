@@ -21,6 +21,7 @@ import RightSidebar from "./components/RightSidebar";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import PostForm from "./components/PostForm";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
 // Mock Data for the application
 
@@ -65,11 +66,11 @@ export default function App() {
     return stored ? JSON.parse(stored) : null;
   });
   const [showRegister, setShowRegister] = useState(false);
-  const [showPostForm, setShowPostForm] = useState(false);
   const [postFormMode, setPostFormMode] = useState("add");
   const [postFormInitial, setPostFormInitial] = useState({});
   const [submittingPost, setSubmittingPost] = useState(false);
   const [refreshFeedFlag, setRefreshFeedFlag] = useState(0);
+  const navigate = useNavigate();
 
   const handleLogin = (data) => {
     setAuth(data);
@@ -90,14 +91,14 @@ export default function App() {
   const handleAddPost = () => {
     setPostFormMode("add");
     setPostFormInitial({});
-    setShowPostForm(true);
+    navigate("/add-post");
   };
 
   // Show edit post modal
   const handleEditPost = (post) => {
     setPostFormMode("edit");
     setPostFormInitial(post);
-    setShowPostForm(true);
+    navigate("/edit-post"); // You can add edit route if needed
   };
 
   // Handle add/edit post submit
@@ -123,7 +124,7 @@ export default function App() {
         alert(data.error || "Failed to save post");
         return;
       }
-      setShowPostForm(false);
+      navigate("/");
       setRefreshFeedFlag((f) => f + 1);
     } finally {
       setSubmittingPost(false);
@@ -163,26 +164,38 @@ export default function App() {
       </div>
       <div className="flex justify-center flex-1">
         <div className="w-[600px]">
-          <Feed
-            user={auth}
-            refreshFlag={refreshFeedFlag}
-            onEditPost={handleEditPost}
-            onRefresh={handleRefreshFeed}
-          />
+          {/* Main content area with routes */}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Feed
+                  user={auth}
+                  refreshFlag={refreshFeedFlag}
+                  onEditPost={handleEditPost}
+                  onRefresh={handleRefreshFeed}
+                />
+              }
+            />
+            <Route
+              path="/add-post"
+              element={
+                <PostForm
+                  mode={postFormMode}
+                  initialValues={postFormInitial}
+                  onSubmit={handlePostFormSubmit}
+                  onCancel={() => navigate("/")}
+                  submitting={submittingPost}
+                />
+              }
+            />
+            {/* You can add an edit route here if you want */}
+          </Routes>
         </div>
         <div className="w-[320px]">
           <RightSidebar suggestionsData={suggestionsData} user={auth} />
         </div>
       </div>
-      {showPostForm && (
-        <PostForm
-          mode={postFormMode}
-          initialValues={postFormInitial}
-          onSubmit={handlePostFormSubmit}
-          onCancel={() => setShowPostForm(false)}
-          submitting={submittingPost}
-        />
-      )}
     </div>
   );
 }

@@ -21,6 +21,10 @@ const Post = ({
   const [commentText, setCommentText] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const commentInputRef = React.useRef(null);
+  const [liked, setLiked] = React.useState(false);
+  const [likesCount, setLikesCount] = React.useState(post.likes || 0);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef(null);
 
   // Determine if user is author or admin
   const isAuthor = user && post.author._id && user.userId === post.author._id;
@@ -28,6 +32,56 @@ const Post = ({
   console.log(post.author._id);
   console.log(user.userId);
   console.log(post);
+
+  React.useEffect(() => {
+    if (user && post.likedBy && Array.isArray(post.likedBy)) {
+      setLiked(post.likedBy.includes(user.userId));
+    } else {
+      setLiked(false);
+    }
+    setLikesCount(post.likes || 0);
+  }, [post, user]);
+
+  React.useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  const handleLikeClick = async () => {
+    if (!user || !user.token) {
+      alert("You must be logged in to like posts.");
+      return;
+    }
+    try {
+      const url = `http://localhost:5000/api/posts/${post._id}/${
+        liked ? "unlike" : "like"
+      }`;
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        credentials: "include",
+      });
+      if (res.ok) {
+        const updatedPost = await res.json();
+        setLiked(updatedPost.likedBy.includes(user.userId));
+        setLikesCount(updatedPost.likes);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update like");
+      }
+    } catch (err) {
+      alert("Failed to update like");
+    }
+  };
 
   const handleCommentIconClick = () => {
     if (commentInputRef.current) {
@@ -109,56 +163,73 @@ const Post = ({
   };
 
   return (
-    <article className="bg-white border border-gray-200 rounded-lg mb-6 max-w-[470px] text-black">
+    <article className="bg-white border border-gray-200 rounded-lg mb-4 sm:mb-6 w-full max-w-full sm:max-w-[470px] text-black shadow-sm">
       {/* Post Header */}
-      <div className="flex items-center p-3">
+      <div className="flex items-center p-2 sm:p-3">
         <img
-          className="w-8 h-8 rounded-full"
+          className="w-8 h-8 rounded-full min-w-8 min-h-8"
           src={"https://placehold.co/48x48/8E44AD/FFFFFF?text=U"}
           alt={post.author?.username || "User"}
         />
-        <span className="font-bold ml-3 mr-1">
+        <span className="font-bold ml-2 mr-1 text-sm sm:text-base">
           {post.author?.username || "Unknown"}
         </span>
-        <span className="text-gray-500 text-sm">
+        <span className="text-gray-500 text-xs sm:text-sm">
           {" "}
           • {getTimeAgo(post.createdAt)}
         </span>
-        <button className="ml-auto">
-          <MoreHorizontal size={20} />
-        </button>
         {(isAuthor || isAdmin) && (
-          <>
-            <button
-              className="ml-2 text-xs text-blue-500 hover:underline"
-              onClick={onEdit}
-            >
-              Edit
+          <div className="relative ml-auto" ref={menuRef}>
+            <button onClick={() => setMenuOpen((v) => !v)}>
+              <MoreHorizontal size={20} />
             </button>
-            <button
-              className="ml-2 text-xs text-red-500 hover:underline"
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
-          </>
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-28 bg-white border border-gray-200 rounded shadow-lg z-10">
+                <button
+                  className="block w-full text-left px-4 py-2 text-xs text-blue-500 hover:bg-gray-100"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onEdit && onEdit();
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="block w-full text-left px-4 py-2 text-xs text-red-500 hover:bg-gray-100"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleDelete();
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
       {/* Post Image */}
-      <div>
+      <div className="w-full bg-gray-100">
         <img
-          className="w-full object-cover"
+          className="w-full h-[220px] sm:h-[350px] object-cover object-center rounded"
           src={dogImage || post.imageUrl}
           alt="Post content"
         />
       </div>
 
       {/* Post Actions */}
-      <div className="flex justify-between p-3">
+      <div className="flex justify-between p-2 sm:p-3">
         <div className="flex space-x-4">
-          <button>
-            <Heart size={24} />
+          <button
+            onClick={handleLikeClick}
+            aria-label={liked ? "Unlike" : "Like"}
+          >
+            <Heart
+              size={24}
+              color={liked ? "red" : "gray"}
+              fill={liked ? "red" : "none"}
+            />
           </button>
           <button onClick={handleCommentIconClick}>
             <MessageCircle size={24} />
@@ -175,11 +246,11 @@ const Post = ({
       </div>
 
       {/* Post Info */}
-      <div className="px-3 pb-3">
-        <p className="font-bold text-sm">
-          {post.likes?.toLocaleString() || 0} likes
+      <div className="px-2 sm:px-3 pb-2 sm:pb-3">
+        <p className="font-bold text-xs sm:text-sm">
+          {likesCount?.toLocaleString() || 0} likes
         </p>
-        <p className="text-sm mt-1">
+        <p className="text-xs sm:text-sm mt-1">
           <span className="font-bold mr-2">
             {post.author?.username || "Unknown"}
           </span>
@@ -188,9 +259,11 @@ const Post = ({
         {/* Comments Section */}
         <div className="mt-2">
           {comments === undefined ? (
-            <p className="text-gray-400 text-sm">Loading comments...</p>
+            <p className="text-gray-400 text-xs sm:text-sm">
+              Loading comments...
+            </p>
           ) : comments.length === 0 ? (
-            <p className="text-gray-400 text-sm">No comments yet.</p>
+            <p className="text-gray-400 text-xs sm:text-sm">No comments yet.</p>
           ) : (
             <>
               {(showAllComments
@@ -198,11 +271,11 @@ const Post = ({
                 : [comments[comments.length - 1]]
               ).map((comment) => (
                 <div key={comment._id} className="flex items-start mb-1">
-                  <span className="font-bold mr-2 text-sm">
+                  <span className="font-bold mr-2 text-xs sm:text-sm">
                     {comment.author?.username || "User"}
                   </span>
-                  <span className="text-sm">{comment.text}</span>
-                  <span className="text-gray-400 text-xs ml-2">
+                  <span className="text-xs sm:text-sm">{comment.text}</span>
+                  <span className="text-gray-400 text-[10px] sm:text-xs ml-2">
                     • {getTimeAgo(comment.createdAt)}
                   </span>
                 </div>
@@ -226,11 +299,11 @@ const Post = ({
             </>
           )}
         </div>
-        <div className="flex items-center mt-2">
+        <div className="flex items-center mt-2 gap-1 sm:gap-2">
           <input
             type="text"
             placeholder="Add a comment..."
-            className="bg-transparent border-none w-full focus:outline-none text-sm"
+            className="bg-transparent border-none w-full focus:outline-none text-xs sm:text-sm"
             ref={commentInputRef}
             value={commentText}
             onChange={handleInputChange}
@@ -238,7 +311,7 @@ const Post = ({
             disabled={submitting}
           />
           <button
-            className="ml-2 text-blue-500 text-xs font-bold disabled:opacity-50"
+            className="ml-1 sm:ml-2 text-blue-500 text-xs font-bold disabled:opacity-50"
             onClick={handleCommentSubmit}
             disabled={submitting || !commentText.trim()}
             aria-label="Post comment"
@@ -246,7 +319,7 @@ const Post = ({
           >
             Post
           </button>
-          <Smile size={16} className="text-gray-400 ml-2" />
+          <Smile size={16} className="text-gray-400 ml-1 sm:ml-2" />
         </div>
       </div>
     </article>
