@@ -16,9 +16,9 @@ const cors = require("cors");
 const PORT = process.env.PORT || 5000;
 
 // Routing
-const postsRouter = require("./routes/posts");
-const commentsRouter = require("./routes/comments");
-const authRouter = require("./routes/auth");
+const postsRouter = require("./Routes/posts");
+const commentsRouter = require("./Routes/comments");
+const authRouter = require("./Routes/auth");
 const resetPasswordRouter = require("./Routes/passwordReset");
 
 // passport require
